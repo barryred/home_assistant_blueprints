@@ -1,0 +1,232 @@
+blueprint:
+  name: Sengled Smart Switch, Pre-Scripted for One Light Entity
+  description: |
+    This ties one 'light' to one Sengled smart switch.
+     - This only controls the brighness of the light (i.e. color and color-temp are left unchanged)
+     - The only thing that MUST be configured, are the 'Light Switch', and target 'Lights', however, much else is configurable.
+     - &copy; below implies that the value is configurable.
+    * on: Immediately to 50% &copy;
+    * double-on: Immediately to 100%
+    * off: Immediately off.
+    * double-off: Immediately off. (looking for suggestions for better use of this.)
+    * up: Immediately +10% &copy;
+    * down: Immediately -10% &copy;
+    * 
+    * long-on: Fade on to the same 'on' value (default 50%), over 7 seconds &copy;
+    * long-off: Fade off over 7 seconds &copy;
+    * long-up: Fade up by 30% &copy; over 1 second &copy;
+    * long-down: Fade down by 30% &copy; over 1 second &copy;
+    
+  domain: automation
+  input:
+    source_light_switch:
+      name: Light Switch
+      description: 'The Sengled light switch/remote (E1E-G7F) (this is the "..._action" entity)'
+      selector:
+        entity:
+          domain: sensor
+    target_light:
+      name: Lights
+      description: The lights to control with the switch/remote.
+      selector:
+          entity:
+            domain: light
+    fade_increment:
+      name: Fade Increment
+      description: The percentage to fade the lights up/down by per step
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: '%'
+    long_fade_increment:
+      name: Long Fade Increment
+      description: The percentage to fade the lights up/down by per step, when up/down is long-pressed.
+      default: 30
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: '%'
+    long_fade_duration:
+      name: Long Fade Increment
+      description: The time to take to fade the lights up/down when up/down is long-pressed.
+      default: 1
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: '%'
+    default_on_value:
+      name: Default On Value
+      description: The percentage to set the lights to when 'on' is pressed. (Note, long-on will set them to 100, so something other than that is likely better here, unless that's what you always want!)
+      default: 50
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: '%'
+    fade_duration:
+      name: Fade Duration
+      description: Long on/off fades the lights; This controls the duration of that fade transition.
+      default: 7
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: 'seconds'
+
+mode: queued
+trigger:
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'on'
+    id: press-on
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'off'
+    id: press-off
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'up'
+    id: press-up
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'down'
+    id: press-down
+    
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'on_double'
+    id: press-on_double
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'on_long'
+    id: press-on_long
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'off_double'
+    id: press-off_double
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'off_long'
+    id: press-off_long
+    
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'down_long'
+    id: press-down_long
+  - platform: state
+    entity_id: !input source_light_switch
+    attribute: action
+    to: 'up_long'
+    id: press-up_long
+    
+variables:
+  fade_increment: !input fade_increment
+  negative_fade_increment: "{{ - fade_increment }}"
+  long_fade_increment: !input long_fade_increment
+  negative_long_fade_increment: "{{ - long_fade_increment }}"
+action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: press-on
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_pct: !input 'default_on_value'
+        entity_id: !input 'target_light'
+    - conditions:
+      - condition: trigger
+        id: press-on_double
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_pct: 100
+        entity_id: !input 'target_light'
+    - conditions:
+      - condition: trigger
+        id: press-on_long
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_pct: !input 'default_on_value'
+          transition: !input 'fade_duration'
+        target:
+          entity_id: !input 'target_light'
+        
+    - conditions:
+      - condition: trigger
+        id: press-off
+      sequence:
+      - service: light.turn_off
+        data: {}
+        entity_id: !input 'target_light'
+    - conditions:
+      - condition: trigger
+        id: press-off_double
+      sequence:
+      - service: light.turn_off
+        data: {}
+        entity_id: !input 'target_light'
+    - conditions:
+      - condition: trigger
+        id: press-off_long
+      sequence:
+      - service: light.turn_off
+        data: 
+          transition: !input 'fade_duration'
+        entity_id: !input 'target_light'
+        
+    - conditions:
+      - condition: trigger
+        id: press-up
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_step_pct: "{{ fade_increment }}"
+        target:
+          entity_id: !input 'target_light'
+    - conditions:
+      - condition: trigger
+        id: press-up_long
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_step_pct: "{{ long_fade_increment }}"
+          transition: !input 'long_fade_duration'
+        target:
+          entity_id: !input 'target_light'
+          
+    - conditions:
+      - condition: trigger
+        id: press-down
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_step_pct: "{{ negative_fade_increment }}"
+        target:
+          entity_id: !input 'target_light'
+    - conditions:
+      - condition: trigger
+        id: press-down_long
+      sequence:
+      - service: light.turn_on
+        data:
+          brightness_step_pct: "{{ negative_long_fade_increment }}"
+          transition: !input 'long_fade_duration'
+        target:
+          entity_id: !input 'target_light'
+        
+        
