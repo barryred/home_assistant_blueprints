@@ -1,5 +1,5 @@
 blueprint:
-  name: Sengled Smart Switch, Pre-Scripted for One Light Entity
+  name: Sengled Smart Switch, Prescriptive, by barryred
   description: |
     This ties one 'light' to one Sengled smart switch.
      - This only controls the brighness of the light (i.e. color and color-temp are left unchanged)
