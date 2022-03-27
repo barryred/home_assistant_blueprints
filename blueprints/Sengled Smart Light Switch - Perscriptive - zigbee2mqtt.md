@@ -1,5 +1,5 @@
 # Sengled Smart Light Switch, Perscriptive Blueprint for zigbee2mqtt
-This ties a Sengled smart switch to one 'light' in a *very* simple (but also perscriptive) way.
+This ties a Sengled smart switch to one 'light' in a *very* simple (but also prescriptive) way.
 
 **Notes:**
 
