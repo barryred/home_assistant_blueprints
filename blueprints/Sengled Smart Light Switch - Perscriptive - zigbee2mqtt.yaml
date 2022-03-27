@@ -31,6 +31,15 @@ blueprint:
       selector:
           entity:
             domain: light
+    default_on_value:
+      name: Default On Value
+      description: The percentage to set the lights to when 'on' is pressed. (Note, long-on will set them to 100, so something other than that is likely better here, unless that's what you always want!)
+      default: 50
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: '%'
     fade_increment:
       name: Fade Increment
       description: The percentage to fade the lights up/down by per step
@@ -40,6 +49,15 @@ blueprint:
           min: 1
           max: 100
           unit_of_measurement: '%'
+    fade_duration:
+      name: Fade Duration
+      description: Long on/off fades the lights; This controls the duration of that fade transition.
+      default: 7
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: 'seconds'
     long_fade_increment:
       name: Long Fade Increment
       description: The percentage to fade the lights up/down by per step, when up/down is long-pressed.
@@ -50,27 +68,9 @@ blueprint:
           max: 100
           unit_of_measurement: '%'
     long_fade_duration:
-      name: Long Fade Increment
+      name: Long Fade Duration
       description: The time to take to fade the lights up/down when up/down is long-pressed.
       default: 1
-      selector:
-        number:
-          min: 0
-          max: 3600
-          unit_of_measurement: '%'
-    default_on_value:
-      name: Default On Value
-      description: The percentage to set the lights to when 'on' is pressed. (Note, long-on will set them to 100, so something other than that is likely better here, unless that's what you always want!)
-      default: 50
-      selector:
-        number:
-          min: 1
-          max: 100
-          unit_of_measurement: '%'
-    fade_duration:
-      name: Fade Duration
-      description: Long on/off fades the lights; This controls the duration of that fade transition.
-      default: 7
       selector:
         number:
           min: 0
